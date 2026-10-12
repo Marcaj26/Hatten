@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hattetrækkeren 🎩</title>
+    <title>Julegavehatten 🎩🎁</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            /* Julebaggrund: Dyb rød og juletræsgrøn gradient */
+            background: linear-gradient(135deg, #8b0000 0%, #1c3d25 100%);
+            color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,70 +17,115 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Let sne-effekt i baggrunden */
+        body::before {
+            content: "❄ ❅ ❆ ❄ ❅ ❆ ❄ ❅ ❆ ❄ ❅ ❆";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            font-size: 1.5rem;
+            letter-spacing: 20px;
+            z-index: -1;
+            pointer-events: none;
         }
 
         .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             max-width: 450px;
             width: 100%;
             margin-bottom: 2rem;
+            border: 3px solid #d4af37; /* Fin guld-kant */
         }
 
-        h1 { margin-top: 0; color: #2c3e50; font-size: 1.8rem; }
-        p { color: #666; margin-bottom: 1.5rem; }
+        h1 { 
+            margin-top: 0; 
+            color: #c0392b; 
+            font-size: 2.2rem; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        p { 
+            color: #555; 
+            margin-bottom: 1.5rem; 
+            font-size: 1.05rem;
+        }
 
         input[type="text"] {
             width: 80%;
-            padding: 0.8rem;
-            font-size: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
             margin-bottom: 1rem;
             outline: none;
+            transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus { border-color: #3498db; }
+        input[type="text"]:focus { border-color: #27ae60; }
 
         .result-box {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #e74c3c;
+            color: #c0392b;
             margin: 1.5rem 0;
             min-height: 2.4rem;
+            background: #fdf2f2;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed #e74c3c;
         }
 
         button {
-            background-color: #3498db;
+            background-color: #27ae60; /* Julegrøn */
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
-            font-size: 1rem;
-            border-radius: 6px;
+            padding: 0.9rem 1.8rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
         }
 
-        button:hover { background-color: #2980b9; }
+        button:hover { 
+            background-color: #219653; 
+            transform: scale(1.02);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
 
         .overview-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
+            padding: 1.8rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             max-width: 450px;
             width: 100%;
+            border: 3px solid #27ae60;
         }
 
         .overview-card h2 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
+            color: #c0392b;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 0.6rem;
         }
 
         ul {
@@ -90,36 +136,37 @@
         }
 
         li {
-            padding: 0.6rem 0;
+            padding: 0.7rem 0;
             border-bottom: 1px solid #f0f0f0;
             display: flex;
             justify-content: space-between;
+            font-size: 1.05rem;
         }
 
         li:last-child { border-bottom: none; }
-        .user-name { font-weight: bold; color: #34495e; }
-        .user-draw { color: #27ae60; font-weight: bold; }
+        .user-name { font-weight: bold; color: #2c3e50; }
+        .user-draw { color: #c0392b; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>Hattetrækkeren 🎩</h1>
-        <p>Indtast dit navn og træk fra hatten!</p>
+        <h1>Julegavehatten 🎅🎁</h1>
+        <p>Indtast dit navn og træk fra hatten! 🎄</p>
 
         <div id="setupForm">
             <input type="text" id="userNameInput" placeholder="Skriv dit navn her..." />
             <br>
-            <button id="drawBtn">Træk fra hatten!</button>
+            <button id="drawBtn">Træk fra hatten! 🎁</button>
         </div>
 
         <div id="resultBox" class="result-box" style="display: none;"></div>
     </div>
 
     <div class="overview-card">
-        <h2>Fælles oversigt 📜</h2>
+        <h2>Hvad trak de andre? 📜✨</h2>
         <ul id="overviewList">
-            <li><em>Henter data...</em></li>
+            <li><em>Henter data fra Nordpolen...</em></li>
         </ul>
     </div>
 
@@ -145,23 +192,23 @@
                     if (existingDraw) {
                         setupForm.style.display = "none";
                         resultBox.style.display = "block";
-                        resultBox.innerHTML = `<small>Hej ${existingDraw.name}, du har allerede trukket:</small><br>${existingDraw.item}`;
+                        resultBox.innerHTML = `<small>Ho ho ho, ${existingDraw.name}! Du har trukket:</small><br>🎁 ${existingDraw.item} 🎁`;
                     }
                 }
             } catch (error) {
-                overviewList.innerHTML = "<li><em>Kunne ikke hente oversigten.</em></li>";
+                overviewList.innerHTML = "<li><em>Kunne ikke hente julelisten...</em></li>";
             }
         }
 
         function updateUIList(draws) {
             overviewList.innerHTML = "";
             if (draws.length === 0) {
-                overviewList.innerHTML = "<li><em>Ingen har trukket endnu...</em></li>";
+                overviewList.innerHTML = "<li><em>Ingen har trukket endnu... Vær den første! 🎅</em></li>";
                 return;
             }
             draws.forEach(entry => {
                 const li = document.createElement("li");
-                li.innerHTML = `<span class="user-name">${entry.name}</span> <span class="user-draw">${entry.item}</span>`;
+                li.innerHTML = `<span class="user-name">${entry.name}</span> <span class="user-draw">🎁 ${entry.item}</span>`;
                 overviewList.appendChild(li);
             });
         }
@@ -170,11 +217,11 @@
         drawBtn.addEventListener("click", async function() {
             const name = userNameInput.value.trim();
             if (!name) {
-                alert("Husk at skrive dit navn først!");
+                alert("Husk at skrive dit navn først, nisseven!");
                 return;
             }
 
-            drawBtn.textContent = "Trækker...";
+            drawBtn.textContent = "Trækker fra hatten... 🎩";
             drawBtn.disabled = true;
 
             try {
@@ -187,7 +234,7 @@
 
                 if (result.status === "error") {
                     alert(result.message);
-                    drawBtn.textContent = "Træk fra hatten!";
+                    drawBtn.textContent = "Træk fra hatten! 🎁";
                     drawBtn.disabled = false;
                     return;
                 }
@@ -200,14 +247,14 @@
                 // Vis resultatet
                 setupForm.style.display = "none";
                 resultBox.style.display = "block";
-                resultBox.innerHTML = `<small>Hej ${name}, du trak:</small><br>${chosenItem}`;
+                resultBox.innerHTML = `<small>Ho ho ho, ${name}! Du har trukket:</small><br>🎁 ${chosenItem} 🎁`;
 
                 // Opdater oversigtslisten
                 fetchDraws();
 
             } catch (error) {
-                alert("Der opstod en fejl. Prøv igen.");
-                drawBtn.textContent = "Træk fra hatten!";
+                alert("Noget gik galt i Nissernes Værksted. Prøv igen.");
+                drawBtn.textContent = "Træk fra hatten! 🎁";
                 drawBtn.disabled = false;
             }
         });
