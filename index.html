@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hattetrækkeren 🎩</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        h1 { margin-top: 0; color: #2c3e50; font-size: 1.8rem; }
+        p { color: #666; margin-bottom: 1.5rem; }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus { border-color: #3498db; }
+
+        .result-box {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 1.5rem 0;
+            min-height: 2.4rem;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover { background-color: #2980b9; }
+
+        .overview-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .overview-card h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+
+        li {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        li:last-child { border-bottom: none; }
+        .user-name { font-weight: bold; color: #34495e; }
+        .user-draw { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Hattetrækkeren 🎩</h1>
+        <p>Indtast dit navn og træk fra hatten!</p>
+
+        <div id="setupForm">
+            <input type="text" id="userNameInput" placeholder="Skriv dit navn her..." />
+            <br>
+            <button id="drawBtn">Træk fra hatten!</button>
+        </div>
+
+        <div id="resultBox" class="result-box" style="display: none;"></div>
+    </div>
+
+    <div class="overview-card">
+        <h2>Fælles oversigt 📜</h2>
+        <ul id="overviewList">
+            <li><em>Henter data...</em></li>
+        </ul>
+    </div>
+
+    <script>
+        // Indholdet i hatten
+        const hatItems = ["Marc","Lærke","Jens","Morten","Fie","Lars","Trine"];
+
+        // INDSÆT DIN GOOGLE SCRIPT URL HERUNDER:
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtkZDB2H9B5sUcr_iIefJutT2JySAnGBQHb0PUwMufHlE-fUI10vyDkVMohCX3X6pY/exec";
+
+        const userNameInput = document.getElementById("userNameInput");
+        const drawBtn = document.getElementById("drawBtn");
+        const setupForm = document.getElementById("setupForm");
+        const resultBox = document.getElementById("resultBox");
+        const overviewList = document.getElementById("overviewList");
+
+        // 1. Hent data fra Google Sheets når siden åbnes
+        async function fetchDraws() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const draws = await response.json();
+                updateUIList(draws);
+
+                // Tjek om den enhed/person der besøger siden allerede har indtastet sit navn
+                // (Vi tjekker localStorage for at huske *hvem* der sidder ved skærmen her og nu)
+                const myName = localStorage.getItem("mitHatteNavn");
+                if (myName) {
+                    const existingDraw = draws.find(d => d.name.toLowerCase() === myName.toLowerCase());
+                    if (existingDraw) {
+                        setupForm.style.display = "none";
+                        resultBox.style.display = "block";
+                        resultBox.innerHTML = `<small>Hej ${existingDraw.name}, du har allerede trukket:</small><br>${existingDraw.item}`;
+                    }
+                }
+            } catch (error) {
+                overviewList.innerHTML = "<li><em>Kunne ikke hente oversigten.</em></li>";
+            }
+        }
+
+        function updateUIList(draws) {
+            overviewList.innerHTML = "";
+            if (draws.length === 0) {
+                overviewList.innerHTML = "<li><em>Ingen har trukket endnu...</em></li>";
+                return;
+            }
+            draws.forEach(entry => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span class="user-name">${entry.name}</span> <span class="user-draw">${entry.item}</span>`;
+                overviewList.appendChild(li);
+            });
+        }
+
+        // 2. Træk-knap logik
+        drawBtn.addEventListener("click", async function() {
+            const name = userNameInput.value.trim();
+            if (!name) {
+                alert("Husk at skrive dit navn først!");
+                return;
+            }
+
+            drawBtn.textContent = "Trækker...";
+            drawBtn.disabled = true;
+
+            // Vælg tilfældigt fra hatten
+            const randomIndex = Math.floor(Math.random() * hatItems.length);
+            const chosenItem = hatItems[randomIndex];
+
+            try {
+                // Send til Google Sheet
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ name: name, item: chosenItem })
+                });
+                const result = await response.json();
+
+                if (result.status === "error") {
+                    alert("Ops! " + result.message);
+                    drawBtn.textContent = "Træk fra hatten!";
+                    drawBtn.disabled = false;
+                    return;
+                }
+
+                // Gem navnet lokalt på denne enhed, så vi ved hvem der sidder her
+                localStorage.setItem("mitHatteNavn", name);
+
+                // Vis resultat
+                setupForm.style.display = "none";
+                resultBox.style.display = "block";
+                resultBox.innerHTML = `<small>Hej ${name}, du trak:</small><br>${chosenItem}`;
+
+                // Opdater listen i bunden
+                fetchDraws();
+
+            } catch (error) {
+                alert("Der opstod en fejl. Prøv igen.");
+                drawBtn.textContent = "Træk fra hatten!";
+                drawBtn.disabled = false;
+            }
+        });
+
+        // Kør ved start
+        fetchDraws();
+    </script>
+
+</body>
+</html>
