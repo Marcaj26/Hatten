@@ -124,11 +124,7 @@
     </div>
 
     <script>
-        // Indholdet i hatten
-        const hatItems = ["Marc","Lærke","Jens","Morten","Fie","Lars","Trine"];
-
-        // INDSÆT DIN GOOGLE SCRIPT URL HERUNDER:
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtkZDB2H9B5sUcr_iIefJutT2JySAnGBQHb0PUwMufHlE-fUI10vyDkVMohCX3X6pY/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwlhAOwk-FtFzUHt374EsTPE4nHZWAaAziOSx-edANqX7--Ge7OBO9SzhS5mUagIoI/exec";
 
         const userNameInput = document.getElementById("userNameInput");
         const drawBtn = document.getElementById("drawBtn");
@@ -143,8 +139,6 @@
                 const draws = await response.json();
                 updateUIList(draws);
 
-                // Tjek om den enhed/person der besøger siden allerede har indtastet sit navn
-                // (Vi tjekker localStorage for at huske *hvem* der sidder ved skærmen her og nu)
                 const myName = localStorage.getItem("mitHatteNavn");
                 if (myName) {
                     const existingDraw = draws.find(d => d.name.toLowerCase() === myName.toLowerCase());
@@ -183,34 +177,32 @@
             drawBtn.textContent = "Trækker...";
             drawBtn.disabled = true;
 
-            // Vælg tilfældigt fra hatten
-            const randomIndex = Math.floor(Math.random() * hatItems.length);
-            const chosenItem = hatItems[randomIndex];
-
             try {
-                // Send til Google Sheet
+                // Send navnet til Google Sheet, som vælger et ledigt navn
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ name: name, item: chosenItem })
+                    body: JSON.stringify({ name: name })
                 });
                 const result = await response.json();
 
                 if (result.status === "error") {
-                    alert("Ops! " + result.message);
+                    alert(result.message);
                     drawBtn.textContent = "Træk fra hatten!";
                     drawBtn.disabled = false;
                     return;
                 }
 
-                // Gem navnet lokalt på denne enhed, så vi ved hvem der sidder her
+                const chosenItem = result.item;
+
+                // Gem navnet lokalt på denne enhed
                 localStorage.setItem("mitHatteNavn", name);
 
-                // Vis resultat
+                // Vis resultatet
                 setupForm.style.display = "none";
                 resultBox.style.display = "block";
                 resultBox.innerHTML = `<small>Hej ${name}, du trak:</small><br>${chosenItem}`;
 
-                // Opdater listen i bunden
+                // Opdater oversigtslisten
                 fetchDraws();
 
             } catch (error) {
