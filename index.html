@@ -7,7 +7,6 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            /* Julebaggrund: Dyb rød og juletræsgrøn gradient */
             background: linear-gradient(135deg, #8b0000 0%, #1c3d25 100%);
             color: #fff;
             display: flex;
@@ -21,7 +20,6 @@
             overflow-x: hidden;
         }
 
-        /* Let sne-effekt i baggrunden */
         body::before {
             content: "❄ ❅ ❆ ❄ ❅ ❆ ❄ ❅ ❆ ❄ ❅ ❆";
             position: absolute;
@@ -46,7 +44,7 @@
             max-width: 450px;
             width: 100%;
             margin-bottom: 2rem;
-            border: 3px solid #d4af37; /* Fin guld-kant */
+            border: 3px solid #d4af37;
         }
 
         h1 { 
@@ -79,7 +77,7 @@
             font-size: 1.8rem;
             font-weight: bold;
             color: #c0392b;
-            margin: 1.5rem 0;
+            margin: 1.5rem 0 1rem 0;
             min-height: 2.4rem;
             background: #fdf2f2;
             padding: 12px;
@@ -88,7 +86,7 @@
         }
 
         button {
-            background-color: #27ae60; /* Julegrøn */
+            background-color: #27ae60;
             color: white;
             border: none;
             padding: 0.9rem 1.8rem;
@@ -107,6 +105,25 @@
 
         button:active {
             transform: scale(0.98);
+        }
+
+        /* Stil til knappen der lader en anden trække */
+        .switch-btn {
+            background-color: transparent;
+            color: #7f8c8d;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            text-decoration: underline;
+            box-shadow: none;
+            padding: 5px;
+        }
+
+        .switch-btn:hover {
+            color: #c0392b;
+            background-color: transparent;
+            transform: none;
         }
 
         .overview-card {
@@ -160,7 +177,10 @@
             <button id="drawBtn">Træk fra hatten! 🎁</button>
         </div>
 
-        <div id="resultBox" class="result-box" style="display: none;"></div>
+        <div id="resultArea" style="display: none;">
+            <div id="resultBox" class="result-box"></div>
+            <button id="switchUserBtn" class="switch-btn">Skift enhed / Andre skal trække? 🔄</button>
+        </div>
     </div>
 
     <div class="overview-card">
@@ -176,10 +196,11 @@
         const userNameInput = document.getElementById("userNameInput");
         const drawBtn = document.getElementById("drawBtn");
         const setupForm = document.getElementById("setupForm");
+        const resultArea = document.getElementById("resultArea");
         const resultBox = document.getElementById("resultBox");
+        const switchUserBtn = document.getElementById("switchUserBtn");
         const overviewList = document.getElementById("overviewList");
 
-        // 1. Hent data fra Google Sheets når siden åbnes
         async function fetchDraws() {
             try {
                 const response = await fetch(SCRIPT_URL);
@@ -191,7 +212,7 @@
                     const existingDraw = draws.find(d => d.name.toLowerCase() === myName.toLowerCase());
                     if (existingDraw) {
                         setupForm.style.display = "none";
-                        resultBox.style.display = "block";
+                        resultArea.style.display = "block";
                         resultBox.innerHTML = `<small>Ho ho ho, ${existingDraw.name}! Du har trukket:</small><br>🎁 ${existingDraw.item} 🎁`;
                     }
                 }
@@ -213,7 +234,6 @@
             });
         }
 
-        // 2. Træk-knap logik
         drawBtn.addEventListener("click", async function() {
             const name = userNameInput.value.trim();
             if (!name) {
@@ -225,7 +245,6 @@
             drawBtn.disabled = true;
 
             try {
-                // Send navnet til Google Sheet, som vælger et ledigt navn
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ name: name })
@@ -240,16 +259,12 @@
                 }
 
                 const chosenItem = result.item;
-
-                // Gem navnet lokalt på denne enhed
                 localStorage.setItem("mitHatteNavn", name);
 
-                // Vis resultatet
                 setupForm.style.display = "none";
-                resultBox.style.display = "block";
+                resultArea.style.display = "block";
                 resultBox.innerHTML = `<small>Ho ho ho, ${name}! Du har trukket:</small><br>🎁 ${chosenItem} 🎁`;
 
-                // Opdater oversigtslisten
                 fetchDraws();
 
             } catch (error) {
@@ -259,7 +274,16 @@
             }
         });
 
-        // Kør ved start
+        // Knap til at rydde enhedens hukommelse, så en anden kan bruge den
+        switchUserBtn.addEventListener("click", function() {
+            localStorage.removeItem("mitHatteNavn");
+            userNameInput.value = "";
+            drawBtn.textContent = "Træk fra hatten! 🎁";
+            drawBtn.disabled = false;
+            resultArea.style.display = "none";
+            setupForm.style.display = "block";
+        });
+
         fetchDraws();
     </script>
 
